@@ -1,6 +1,5 @@
 import * as express from 'express';
 import 'express-async-errors';
-// comentario para commit
 
 import errorMiddleware from './middlewares/errorMiddleware';
 
