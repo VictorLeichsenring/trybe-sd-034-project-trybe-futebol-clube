@@ -3,15 +3,6 @@ import Auth from '../utils/Auth';
 import { RespType } from '../types/RespService';
 import Users from '../database/models/User.Model';
 
-async function getByEmail(email:string): Promise<RespType> {
-  const user = await Users.findOne({
-    where: { email },
-    attributes: { exclude: ['password'] },
-  });
-  if (!user) return { status: 'NOT_FOUND', data: { message: 'User does not exist' } };
-  return { status: 'successful', data: user };
-}
-
 const isEmailValid = (email: string) => {
   const emailRegex = /\S+@\S+\.\S+/;
   return emailRegex.test(email);
@@ -39,6 +30,5 @@ async function login(email: string, password:string): Promise<RespType> {
 }
 
 export default {
-  getByEmail,
   login,
 };
