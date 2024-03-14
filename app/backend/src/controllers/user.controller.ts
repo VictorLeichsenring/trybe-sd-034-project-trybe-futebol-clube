@@ -4,7 +4,7 @@ import { userService } from '../services';
 
 declare module 'express-serve-static-core' {
   interface Request {
-    user?: { email: string; [key: string]: any; }; // Adapte para refletir seu tipo de usuário
+    user?: { email: string; id: number; }; // Adapte para refletir seu tipo de usuário
   }
 }
 
