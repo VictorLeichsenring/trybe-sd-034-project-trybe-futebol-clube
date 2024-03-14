@@ -71,21 +71,18 @@ async function validateTeamsExistence({ homeTeamId,
     return { status: 'invalidValue', data: { message: validationError } };
   }
 
-  // Verifica a existência do time da casa
   const homeTeamExists = await Teams.findByPk(homeTeamId);
   if (!homeTeamExists) {
     const validationError = 'There is no team with such id!';
     return { status: 'notFound', data: { message: validationError } };
   }
 
-  // Verifica a existência do time visitante
   const awayTeamExists = await Teams.findByPk(awayTeamId);
   if (!awayTeamExists) {
     const validationError = 'There is no team with such id!';
     return { status: 'notFound', data: { message: validationError } };
   }
 
-  // Se todas as verificações passarem, retorna null
   return null;
 }
 const insertMatch = async (data: CreateMatchData): Promise<Matches> => {
@@ -95,26 +92,6 @@ const insertMatch = async (data: CreateMatchData): Promise<Matches> => {
   });
   return newMatch;
 };
-
-// const createMatch = async (data: CreateMatchData): Promise<RespType> => {
-//   // const { homeTeamId, awayTeamId } = data;
-//   // const validationError = await validateTeamsExistence({ homeTeamId, awayTeamId });
-//   // if (validationError) {
-//   //   return validationError;
-//   // }
-//   const newMatch = await insertMatch(data);
-//   return {
-//     status: 'created',
-//     data: {
-//       id: newMatch.id,
-//       homeTeamId: newMatch.homeTeamId,
-//       homeTeamGoals: newMatch.homeTeamGoals,
-//       awayTeamId: newMatch.awayTeamId,
-//       awayTeamGoals: newMatch.awayTeamGoals,
-//       inProgress: newMatch.inProgress,
-//     },
-//   };
-// };
 
 const createMatch = async (data: CreateMatchData): Promise<RespType> => {
   const { homeTeamId, awayTeamId } = data;
