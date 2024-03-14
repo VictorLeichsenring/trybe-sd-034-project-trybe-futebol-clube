@@ -10,6 +10,8 @@ interface ITeamStats {
   totalLosses: number;
   goalsFavor: number;
   goalsOwn: number;
+  goalsBalance: number;
+  efficiency: string;
 }
 interface IMatch {
   homeTeamId: number;
@@ -43,11 +45,12 @@ function initializeTeamStats(): ITeamStats {
     totalLosses: 0,
     goalsFavor: 0,
     goalsOwn: 0,
+    goalsBalance: 0,
+    efficiency: '0.00',
   };
 }
 
 function updateTeamStatsForMatch(teamStats: ITeamStats, match: IMatch): ITeamStats {
-  // Cria uma cópia de teamStats para evitar reatribuição ao parâmetro
   const updatedTeamStats = { ...teamStats };
 
   updatedTeamStats.totalGames += 1;
@@ -72,14 +75,23 @@ async function calculateHomeTeamStats(matches: IMatch[], teams: ITeam[]): Promis
     const homeMatches = matches
       .filter((match) => match.homeTeamId === team.id && !match.inProgress);
 
-    const stats = homeMatches
+    let stats = homeMatches
       .reduce((acc, match) => updateTeamStatsForMatch(acc, match), initializeTeamStats());
 
-    return {
+    // Adicionando cálculos de goalsBalance e efficiency
+    stats = {
       ...stats,
       name: team.teamName,
+      goalsBalance: stats.goalsFavor - stats.goalsOwn,
+      efficiency: ((stats.totalPoints / (stats.totalGames * 3)) * 100).toFixed(2),
     };
-  });
+
+    return stats;
+  }).sort((a, b) => // Ordenando conforme os critérios definidos
+    b.totalPoints - a.totalPoints
+    || b.totalVictories - a.totalVictories
+    || b.goalsBalance - a.goalsBalance
+    || b.goalsFavor - a.goalsFavor);
 }
 
 async function getHomeLeaderboard() {
