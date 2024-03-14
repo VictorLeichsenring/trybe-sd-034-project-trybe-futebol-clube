@@ -32,8 +32,20 @@ async function updateMatch(req: Request, res: Response): Promise<Response> {
   return res.status(mapStatusHTTP(status)).json(data);
 }
 
+const extractMatchData = (req: Request) => {
+  const { homeTeamId, awayTeamId, homeTeamGoals, awayTeamGoals } = req.body;
+  return { homeTeamId, awayTeamId, homeTeamGoals, awayTeamGoals };
+};
+
+const createMatch = async (req: Request, res: Response): Promise<Response> => {
+  const matchData = extractMatchData(req);
+  const { status, data } = await matchService.createMatch(matchData);
+  return res.status(mapStatusHTTP(status)).json(data);
+};
+
 export default {
   getAll,
+  createMatch,
   finishMatch,
   updateMatch,
 };
