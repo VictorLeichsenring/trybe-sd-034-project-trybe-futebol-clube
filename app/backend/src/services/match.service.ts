@@ -25,21 +25,34 @@ const getAll = async (): Promise<RespType> => {
 
 const finishMatch = async (matchId: number): Promise<RespType> => {
   const match = await Matches.findByPk(matchId);
-
   if (!match) {
     return { status: 'error', data: { message: 'Match not found' } };
   }
-
   if (!match.inProgress) {
     return { status: 'error', data: { message: 'Match is already finished' } };
   }
-
   await match.update({ inProgress: false });
-
   return { status: 'successful', data: { message: 'Finished' } };
+};
+
+const updateMatch = async (
+  matchId: number,
+  homeTeamGoals: number,
+  awayTeamGoals: number,
+): Promise<RespType> => {
+  const match = await Matches.findByPk(matchId);
+  if (!match) {
+    return { status: 'error', data: { message: 'Match not found' } };
+  }
+  if (!match.inProgress) {
+    return { status: 'error', data: { message: 'Match is not in progress' } };
+  }
+  await match.update({ homeTeamGoals, awayTeamGoals });
+  return { status: 'successful', data: { message: 'Match updated successfully' } };
 };
 
 export default {
   getAll,
   finishMatch,
+  updateMatch,
 };

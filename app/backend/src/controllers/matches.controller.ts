@@ -24,7 +24,16 @@ async function finishMatch(req: Request, res: Response) {
   return res.status(mapStatusHTTP(status)).json(data);
 }
 
+async function updateMatch(req: Request, res: Response): Promise<Response> {
+  const { id } = req.params;
+  const { homeTeamGoals, awayTeamGoals } = req.body;
+  const matchId = parseInt(id, 10); // Garantindo que o id é um número
+  const { status, data } = await matchService.updateMatch(matchId, homeTeamGoals, awayTeamGoals);
+  return res.status(mapStatusHTTP(status)).json(data);
+}
+
 export default {
   getAll,
   finishMatch,
+  updateMatch,
 };
