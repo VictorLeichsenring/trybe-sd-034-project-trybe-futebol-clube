@@ -1,5 +1,6 @@
 import IUsers from '../Interfaces/iUsers';
 import ITeams from '../Interfaces/ITeams';
+import IMatches from '../Interfaces/iMatches';
 
 type tokenResp = { token: string };
 type RoleResp = { role: string };
@@ -14,6 +15,8 @@ export type RespType = {
   ITeams
   | ITeams[]
   | IUsers
+  | IMatches
+  | IMatches[]
   | RoleResp
   | string
   | tokenResp
