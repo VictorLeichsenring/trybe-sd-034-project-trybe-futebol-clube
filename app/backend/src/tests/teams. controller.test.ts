@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { Request, Response } from 'express';
 import teamsController from '../controllers/teams.controller';
-import TeamService from '../services';
+import { teamService } from '../services';
 
 describe('Teams Controller', () => {
   // Encapsula ambos os conjuntos de testes para getAll e getById
@@ -16,7 +16,7 @@ describe('Teams Controller', () => {
       
       // Outras configurações permanecem iguais
       const mockTeams = [{ id: 1, teamName: 'time 1' }, { id: 2, teamName: 'time 2' }];
-      sinon.stub(TeamService, 'getAll').resolves({ status: 'successful', data: mockTeams });
+      sinon.stub(teamService, 'getAll').resolves({ status: 'successful', data: mockTeams });
 
       await teamsController.getAll({} as Request, res as Response);
 
@@ -45,7 +45,7 @@ describe('Teams Controller', () => {
       const req = { params: { id: '1' } } as Partial<Request>;
       const mockTeam = { id: 1, teamName: 'time 1' };
   
-      sinon.stub(TeamService, 'getById').resolves({ status: 'successful', data: mockTeam });
+      sinon.stub(teamService, 'getById').resolves({ status: 'successful', data: mockTeam });
   
       await teamsController.getById(req as Request, res as Response);
   
@@ -56,7 +56,7 @@ describe('Teams Controller', () => {
     it('Deve retornar 404 se o time não for encontrado', async () => {
       const req = { params: { id: '999' } } as Partial<Request>;
   
-      sinon.stub(TeamService, 'getById').resolves({ status: 'notFound', data: { message: 'Team not found' } });
+      sinon.stub(teamService, 'getById').resolves({ status: 'notFound', data: { message: 'Team not found' } });
   
       await teamsController.getById(req as Request, res as Response);
   
