@@ -1,11 +1,11 @@
 import { DataTypes, Optional, ModelDefined } from 'sequelize';
 import db from './index';
 
-import { Team } from '../../types/Team';
+import { TeamType } from '../../types/Team';
 
-export type TeamInputtableFields = Optional<Team, 'id'>;
+export type TeamInputtableFields = Optional<TeamType, 'id'>;
 
-type TeamSequelizeModelCreator = ModelDefined<Team, TeamInputtableFields>;
+type TeamSequelizeModelCreator = ModelDefined<TeamType, TeamInputtableFields>;
 
 const TeamModel: TeamSequelizeModelCreator = db.define('Team', {
   teamName: DataTypes.STRING,
