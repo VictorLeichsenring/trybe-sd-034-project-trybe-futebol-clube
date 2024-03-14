@@ -5,8 +5,6 @@ import Teams from '../database/models/Team.Model';
 const getAll = async (): Promise<RespType> => {
   const matches = await Matches.findAll();
   const teams = await Teams.findAll();
-
-  // Combina os dados de matches e teams
   const matchesData = matches.map((match) => {
     const homeTeam = teams.find((team) => team.id === match.homeTeamId);
     const awayTeam = teams.find((team) => team.id === match.awayTeamId);
@@ -25,6 +23,23 @@ const getAll = async (): Promise<RespType> => {
   return { status: 'successful', data: matchesData };
 };
 
+const finishMatch = async (matchId: number): Promise<RespType> => {
+  const match = await Matches.findByPk(matchId);
+
+  if (!match) {
+    return { status: 'error', data: { message: 'Match not found' } };
+  }
+
+  if (!match.inProgress) {
+    return { status: 'error', data: { message: 'Match is already finished' } };
+  }
+
+  await match.update({ inProgress: false });
+
+  return { status: 'successful', data: { message: 'Finished' } };
+};
+
 export default {
   getAll,
+  finishMatch,
 };
