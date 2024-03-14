@@ -30,7 +30,7 @@ async function login(email: string, password:string): Promise<RespType> {
     return { status: 'unauthorized', data: { message: unauthorizedMessage } };
   }
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
+  if (!isMatch || password.length < 6) {
     return { status: 'unauthorized', data: { message: unauthorizedMessage } };
   }
 

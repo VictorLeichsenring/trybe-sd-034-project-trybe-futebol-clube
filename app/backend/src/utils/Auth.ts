@@ -2,7 +2,6 @@ import * as jwt from 'jsonwebtoken';
 
 const { JWT_SECRET } = process.env;
 const JWT_CONFIG = {
-  algorithm: 'HS256',
   expiresIn: '1d',
 };
 
