@@ -2,11 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import { TokenPayload } from '../types/types';
 import Auth from '../utils/Auth';
 
-declare module 'express-serve-static-core' {
-  export interface Request {
-    user?: TokenPayload;
-  }
-}
+// declare module 'express-serve-static-core' {
+//   export interface Request {
+//     user?: TokenPayload;
+//   }
+// }
 
 const verifyToken = (req: Request, res: Response, next: NextFunction) => {
   const bearerToken = req.headers.authorization;
