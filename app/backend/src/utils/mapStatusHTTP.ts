@@ -5,7 +5,7 @@ const httpErrorMap: Record<string, number> = {
   notFound: 404,
   conflict: 409,
   invalidValue: 422,
-  unauthorized: 401, // Corrigido de 'unauthorizad' para 'unauthorized'
+  unauthorized: 401,
   badRequest: 400,
 };
 type HttpStatusKey = keyof typeof httpErrorMap;

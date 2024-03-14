@@ -1,3 +1,4 @@
 import teamRoutes from './teams.routes';
+import loginRoutes from './login.routes';
 
-export default teamRoutes;
+export { teamRoutes, loginRoutes };
