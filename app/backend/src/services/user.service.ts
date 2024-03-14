@@ -29,6 +29,16 @@ async function login(email: string, password:string): Promise<RespType> {
   return { status: 'successful', data: { token } };
 }
 
+async function getUserRole(email: string): Promise<RespType> {
+  const user = await Users.findOne({
+    where: { email },
+  });
+  if (!user) return { status: 'notFound', data: { message: 'User not found' } };
+  const resp = { role: user?.role };
+  return { status: 'successful', data: resp };
+}
+
 export default {
   login,
+  getUserRole,
 };
