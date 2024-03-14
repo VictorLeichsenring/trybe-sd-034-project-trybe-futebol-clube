@@ -1,10 +1,9 @@
 import { Model, QueryInterface, DataTypes } from "sequelize";
-
-import { TeamType } from '../../types/Team';
+import ITeams from "../../Interfaces/ITeams";
 
 export default {
-  up(queryInterface: QueryInterface) { 
-    return queryInterface.createTable<Model<TeamType>>('teams', { 
+  up(queryInterface: QueryInterface) {
+    return queryInterface.createTable<Model<ITeams>>('teams', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -12,12 +11,12 @@ export default {
         type: DataTypes.INTEGER,
       },
       teamName: {
-        allowNull: false,
         type: DataTypes.STRING,
-      }
-    }) 
-  }, 
+        field: 'team_name',
+      },
+    });
+  },
   down(queryInterface: QueryInterface) {
-    return queryInterface.dropTable('teams')
-  }
+    return queryInterface.dropTable('teams');
+  },
 };
