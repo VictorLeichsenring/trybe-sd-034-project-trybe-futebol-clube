@@ -70,28 +70,33 @@ function updateTeamStatsForMatch(teamStats: ITeamStats, match: IMatch): ITeamSta
   return updatedTeamStats;
 }
 
-async function calculateHomeTeamStats(matches: IMatch[], teams: ITeam[]): Promise<ITeamStats[]> {
-  return teams.map((team) => {
-    const homeMatches = matches
-      .filter((match) => match.homeTeamId === team.id && !match.inProgress);
-
-    let stats = homeMatches
-      .reduce((acc, match) => updateTeamStatsForMatch(acc, match), initializeTeamStats());
-
-    // Adicionando cálculos de goalsBalance e efficiency
-    stats = {
-      ...stats,
-      name: team.teamName,
-      goalsBalance: stats.goalsFavor - stats.goalsOwn,
-      efficiency: ((stats.totalPoints / (stats.totalGames * 3)) * 100).toFixed(2),
-    };
-
-    return stats;
-  }).sort((a, b) => // Ordenando conforme os critérios definidos
+function sortLeaderboard(leaderboard: ITeamStats[]): ITeamStats[] {
+  return leaderboard.sort((a, b) =>
     b.totalPoints - a.totalPoints
     || b.totalVictories - a.totalVictories
     || b.goalsBalance - a.goalsBalance
     || b.goalsFavor - a.goalsFavor);
+}
+
+async function calculateHomeTeamStats(matches: IMatch[], teams: ITeam[]): Promise<ITeamStats[]> {
+  const stats = teams.map((team) => {
+    const homeMatches = matches
+      .filter((match) => match.homeTeamId === team.id && !match.inProgress);
+
+    const teamStats = homeMatches.reduce((acc, match) => {
+      const updatedStats = updateTeamStatsForMatch(acc, match);
+      updatedStats.name = team.teamName; // Atribuir o nome do time fora da função updateTeamStatsForMatch
+      return updatedStats;
+    }, initializeTeamStats());
+
+    // Calcular goalsBalance e efficiency
+    teamStats.goalsBalance = teamStats.goalsFavor - teamStats.goalsOwn;
+    teamStats.efficiency = ((teamStats.totalPoints / (teamStats.totalGames * 3)) * 100).toFixed(2);
+
+    return teamStats;
+  });
+
+  return sortLeaderboard(stats); // Usar a função de ordenação aqui
 }
 
 async function getHomeLeaderboard() {
@@ -108,6 +113,37 @@ async function getHomeLeaderboard() {
   return sortedLeaderboard;
 }
 
+async function calculateAwayTeamStats(matches: IMatch[], teams: ITeam[]): Promise<ITeamStats[]> {
+  const stats = teams.map((team) => {
+    const awayMatches = matches
+      .filter((match) => match.awayTeamId === team.id && !match.inProgress);
+
+    const teamStats = awayMatches.reduce((acc, match) => {
+      const updatedStats = updateTeamStatsForMatch(acc, match);
+      updatedStats.name = team.teamName;
+      return updatedStats;
+    }, initializeTeamStats());
+
+    // Calcular goalsBalance e efficiency
+    teamStats.goalsBalance = teamStats.goalsFavor - teamStats.goalsOwn;
+    teamStats.efficiency = ((teamStats.totalPoints / (teamStats.totalGames * 3)) * 100).toFixed(2);
+
+    return teamStats;
+  });
+
+  return sortLeaderboard(stats); // Usar a função de ordenação aqui
+}
+
+async function getAwayLeaderboard() {
+  const teams = await getTeams();
+  const matches = await getMatches();
+
+  const leaderboard = await calculateAwayTeamStats(matches, teams);
+  // Ordena a classificação conforme critérios definidos
+  return sortLeaderboard(leaderboard);
+}
+
 export default {
   getHomeLeaderboard,
+  getAwayLeaderboard,
 };

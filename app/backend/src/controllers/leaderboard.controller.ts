@@ -6,6 +6,12 @@ async function getHomeLeaderboard(req:Request, res: Response) {
   return res.status(200).json(leaderboard);
 }
 
+async function getAwayLeaderboard(req:Request, res: Response) {
+  const leaderboard = await leaderboardService.getAwayLeaderboard();
+  return res.status(200).json(leaderboard);
+}
+
 export default {
   getHomeLeaderboard,
+  getAwayLeaderboard,
 };
