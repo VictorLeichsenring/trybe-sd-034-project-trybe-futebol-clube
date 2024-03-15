@@ -50,97 +50,70 @@ function initializeTeamStats(): ITeamStats {
   };
 }
 
-function updateTeamStatsForMatch(teamStats: ITeamStats, match: IMatch): ITeamStats {
+function updateTeamStatsForMatch(teamStats: ITeamStats, match: IMatch, isHome: boolean)
+  : ITeamStats {
   const updatedTeamStats = { ...teamStats };
 
+  // Se for partida em casa, use homeTeamGoals; se for fora, use awayTeamGoals
   updatedTeamStats.totalGames += 1;
-  updatedTeamStats.goalsFavor += match.homeTeamGoals;
-  updatedTeamStats.goalsOwn += match.awayTeamGoals;
+  const goalsScored = isHome ? match.homeTeamGoals : match.awayTeamGoals;
+  const goalsConceded = isHome ? match.awayTeamGoals : match.homeTeamGoals;
+  updatedTeamStats.goalsFavor += goalsScored;
+  updatedTeamStats.goalsOwn += goalsConceded;
 
-  if (match.homeTeamGoals > match.awayTeamGoals) {
+  if ((isHome && match.homeTeamGoals > match.awayTeamGoals)
+  || (!isHome && match.awayTeamGoals > match.homeTeamGoals)) {
     updatedTeamStats.totalPoints += 3;
     updatedTeamStats.totalVictories += 1;
   } else if (match.homeTeamGoals === match.awayTeamGoals) {
     updatedTeamStats.totalPoints += 1;
     updatedTeamStats.totalDraws += 1;
-  } else {
-    updatedTeamStats.totalLosses += 1;
-  }
+  } else { updatedTeamStats.totalLosses += 1; }
 
   return updatedTeamStats;
 }
 
-function sortLeaderboard(leaderboard: ITeamStats[]): ITeamStats[] {
-  return leaderboard.sort((a, b) =>
+function sortLeaderboard(a: ITeamStats, b: ITeamStats): number {
+  return (
     b.totalPoints - a.totalPoints
     || b.totalVictories - a.totalVictories
     || b.goalsBalance - a.goalsBalance
-    || b.goalsFavor - a.goalsFavor);
+    || b.goalsFavor - a.goalsFavor
+  );
 }
 
-async function calculateHomeTeamStats(matches: IMatch[], teams: ITeam[]): Promise<ITeamStats[]> {
-  const stats = teams.map((team) => {
-    const homeMatches = matches
-      .filter((match) => match.homeTeamId === team.id && !match.inProgress);
+async function calculateTeamStats(
+  matches: IMatch[],
+  teams: ITeam[],
+  isHome: boolean,
+): Promise<ITeamStats[]> {
+  return teams.map((team) => {
+    const relevantMatches = matches.filter((match) =>
+      (isHome ? match.homeTeamId : match.awayTeamId) === team.id && !match.inProgress);
 
-    const teamStats = homeMatches.reduce((acc, match) => {
-      const updatedStats = updateTeamStatsForMatch(acc, match);
+    const teamStats = relevantMatches.reduce((acc, match) => {
+      const updatedStats = updateTeamStatsForMatch(acc, match, isHome);
       updatedStats.name = team.teamName; // Atribuir o nome do time fora da função updateTeamStatsForMatch
+      updatedStats.goalsBalance = updatedStats.goalsFavor - updatedStats.goalsOwn;
+      updatedStats.efficiency = (
+        (updatedStats.totalPoints / (updatedStats.totalGames * 3)) * 100).toFixed(2);
       return updatedStats;
     }, initializeTeamStats());
 
-    // Calcular goalsBalance e efficiency
-    teamStats.goalsBalance = teamStats.goalsFavor - teamStats.goalsOwn;
-    teamStats.efficiency = ((teamStats.totalPoints / (teamStats.totalGames * 3)) * 100).toFixed(2);
-
     return teamStats;
-  });
-
-  return sortLeaderboard(stats); // Usar a função de ordenação aqui
+  }).sort(sortLeaderboard); // Usar a função de ordenação aqui
 }
 
 async function getHomeLeaderboard() {
   const teams = await getTeams();
   const matches = await getMatches();
-  const leaderboard = await calculateHomeTeamStats(matches, teams);
-
-  // Ordena a classificação conforme critérios definidos
-  const sortedLeaderboard = leaderboard.sort((a, b) =>
-    b.totalPoints - a.totalPoints
-    || b.totalVictories - a.totalVictories
-    || (b.goalsFavor - b.goalsOwn) - (a.goalsFavor - a.goalsOwn));
-
-  return sortedLeaderboard;
-}
-
-async function calculateAwayTeamStats(matches: IMatch[], teams: ITeam[]): Promise<ITeamStats[]> {
-  const stats = teams.map((team) => {
-    const awayMatches = matches
-      .filter((match) => match.awayTeamId === team.id && !match.inProgress);
-
-    const teamStats = awayMatches.reduce((acc, match) => {
-      const updatedStats = updateTeamStatsForMatch(acc, match);
-      updatedStats.name = team.teamName;
-      return updatedStats;
-    }, initializeTeamStats());
-
-    // Calcular goalsBalance e efficiency
-    teamStats.goalsBalance = teamStats.goalsFavor - teamStats.goalsOwn;
-    teamStats.efficiency = ((teamStats.totalPoints / (teamStats.totalGames * 3)) * 100).toFixed(2);
-
-    return teamStats;
-  });
-
-  return sortLeaderboard(stats); // Usar a função de ordenação aqui
+  return calculateTeamStats(matches, teams, true);
 }
 
 async function getAwayLeaderboard() {
   const teams = await getTeams();
   const matches = await getMatches();
-
-  const leaderboard = await calculateAwayTeamStats(matches, teams);
-  // Ordena a classificação conforme critérios definidos
-  return sortLeaderboard(leaderboard);
+  return calculateTeamStats(matches, teams, false);
 }
 
 export default {
