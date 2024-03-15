@@ -11,7 +11,13 @@ async function getAwayLeaderboard(req:Request, res: Response) {
   return res.status(200).json(leaderboard);
 }
 
+async function generalLeaderboard(req:Request, res: Response) {
+  const leaderboard = await leaderboardService.getGeneralLeaderboard();
+  return res.status(200).json(leaderboard);
+}
+
 export default {
   getHomeLeaderboard,
   getAwayLeaderboard,
+  generalLeaderboard,
 };

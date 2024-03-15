@@ -116,7 +116,77 @@ async function getAwayLeaderboard() {
   return calculateTeamStats(matches, teams, false);
 }
 
+async function calculateGeneralTeamStats(
+  matches: IMatch[],
+  teams: ITeam[],
+): Promise<ITeamStats[]> {
+  return teams.map((team) => {
+    const relevantMatches = matches.filter((match) =>
+      (!match.inProgress) && (match.homeTeamId === team.id || match.awayTeamId === team.id));
+
+    const teamStats = relevantMatches.reduce((acc, match) => {
+      const isHome = match.homeTeamId === team.id;
+      const updatedStats = updateTeamStatsForMatch(acc, match, isHome);
+      // Certifique-se de que teamName esteja acessível como esperado, ajuste conforme sua estrutura de dados
+      updatedStats.name = team.teamName;
+      updatedStats.goalsBalance = updatedStats.goalsFavor - updatedStats.goalsOwn;
+      updatedStats.efficiency = (
+        (updatedStats.totalPoints / (updatedStats.totalGames * 3)) * 100).toFixed(2);
+      return updatedStats;
+    }, initializeTeamStats());
+
+    return teamStats;
+  }).sort(sortLeaderboard); // Use sua função de ordenação existente
+}
+
+async function getGeneralLeaderboard() {
+  const teams = await getTeams(); // Assume que esta função retorna todos os times
+  const matches = await getMatches(); // Assume que esta função retorna todas as partidas finalizadas
+  return calculateGeneralTeamStats(matches, teams);
+  // const teamStats = teams.map((team) => {
+  //   // console.log(team.dataValues.teamName)
+  //   const stats = initializeTeamStats(); // Inicialize suas estatísticas
+  //   stats.name = team.dataValues.teamName;
+  //   matches.forEach((match) => {
+  //     if (match.inProgress) return; // Ignora partidas em andamento
+
+  //     const isHomeTeam = match.homeTeamId === team.id;
+  //     const isAwayTeam = match.awayTeamId === team.id;
+
+  //     if (isHomeTeam || isAwayTeam) {
+  //       const goalsScored = isHomeTeam ? match.homeTeamGoals : match.awayTeamGoals;
+  //       const goalsConceded = isHomeTeam ? match.awayTeamGoals : match.homeTeamGoals;
+  //       const won = goalsScored > goalsConceded;
+  //       const drawn = goalsScored === goalsConceded;
+
+  //       // Atualiza as estatísticas baseando-se nos resultados
+  //       stats.totalGames += 1;
+  //       stats.goalsFavor += goalsScored;
+  //       stats.goalsOwn += goalsConceded;
+  //       stats.goalsBalance = stats.goalsFavor - stats.goalsOwn;
+
+  //       if (won) {
+  //         stats.totalPoints += 3;
+  //         stats.totalVictories += 1;
+  //       } else if (drawn) {
+  //         stats.totalPoints += 1;
+  //         stats.totalDraws += 1;
+  //       } else {
+  //         stats.totalLosses += 1;
+  //       }
+
+  //       stats.efficiency = ((stats.totalPoints / (stats.totalGames * 3)) * 100).toFixed(2);
+  //     }
+  //   });
+
+  //   return stats;
+  // }).sort(sortLeaderboard); // Utilize a função de ordenação conforme especificado
+
+  // return teamStats;
+}
+
 export default {
   getHomeLeaderboard,
   getAwayLeaderboard,
+  getGeneralLeaderboard,
 };
